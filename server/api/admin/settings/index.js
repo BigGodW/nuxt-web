@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
     const saved = await demoAware(
       event,
       async () => {
-        const rows = await prisma.$transaction(
+        const rows = await Promise.all(
           items
             .filter((item) => item && item.key)
             .map((item) => prisma.siteSetting.upsert({

@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
   const result = await withDemo(
     async () => {
-      const [list, total] = await prisma.$transaction([
+      const [list, total] = await Promise.all([
         prisma.article.findMany({
           where, include: articleInclude,
           orderBy: [{ isTop: 'desc' }, { publishedAt: 'desc' }, { createdAt: 'desc' }],

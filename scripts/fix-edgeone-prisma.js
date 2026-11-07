@@ -19,11 +19,21 @@ import {
 import { join, resolve } from 'node:path'
 
 const NODE_MODULES = resolve('.edgeone/cloud-functions/ssr-node/node_modules')
-const GENERATED = join(NODE_MODULES, '.prisma', 'client')
+const OUTPUT_GENERATED = join(NODE_MODULES, '.prisma', 'client')
+const ROOT_GENERATED = resolve('node_modules/.prisma/client')
 
 // 本地普通 `nuxt build` 输出的是 .output，不需要这个修正
-if (!existsSync(GENERATED)) {
+if (!existsSync(NODE_MODULES)) {
   console.log('[edgeone-prisma] 未检测到 EdgeOne 产物，跳过')
+  process.exit(0)
+}
+
+// 重复构建时 .edgeone 里的生成目录可能是上一轮的旧产物，
+// 而 npm install 的 postinstall 刚在项目根执行过 prisma generate。
+// 两个来源合并复制（后者覆盖同名文件），确保所有 binaryTargets 引擎都进上传包。
+const SOURCES = [OUTPUT_GENERATED, ROOT_GENERATED].filter((dir) => existsSync(dir))
+if (!SOURCES.length) {
+  console.warn('[edgeone-prisma] 未找到 Prisma 生成目录，跳过')
   process.exit(0)
 }
 
@@ -39,9 +49,13 @@ function copyDir(src, dest) {
 
 const TARGET = join(NODE_MODULES, 'yunjian-prisma-client')
 rmSync(TARGET, { recursive: true, force: true })
-copyDir(GENERATED, TARGET)
+for (const source of SOURCES) copyDir(source, TARGET)
 // Windows 引擎在线上用不到，去掉可省 21MB 上传体积
 rmSync(join(TARGET, 'query_engine-windows.dll.node'), { force: true })
+
+// 打印实际打包的 Linux 引擎，便于在云端构建日志里核对目标平台是否齐全
+const engines = readdirSync(TARGET).filter((name) => /^libquery_engine-.*\.so\.node$/.test(name))
+console.log(`[edgeone-prisma] 打包引擎: ${engines.sort().join(', ') || '(无)'}`)
 
 const ENTRY = join(NODE_MODULES, '@prisma', 'client', 'default.js')
 if (existsSync(ENTRY)) {

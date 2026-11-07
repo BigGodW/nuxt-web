@@ -61,11 +61,14 @@ export default defineEventHandler(async (event) => {
     const product = await demoAware(
       event,
       async () => {
-        await prisma.$transaction([
-          prisma.productImage.deleteMany({ where: { productId: id } }),
-          prisma.product.update({ where: { id }, data }),
-          ...(images.length ? [prisma.productImage.createMany({ data: images.map((img) => ({ ...img, productId: id })) })] : [])
-        ])
+        // 交互式事务：回调里的 tx 是原生 Prisma Client，保留删图/改主表/重建图的原子性
+        await prisma.$transaction(async (tx) => {
+          await tx.productImage.deleteMany({ where: { productId: id } })
+          await tx.product.update({ where: { id }, data })
+          if (images.length) {
+            await tx.productImage.createMany({ data: images.map((img) => ({ ...img, productId: id })) })
+          }
+        })
         return prisma.product.findUnique({ where: { id }, include: productInclude })
       },
       () => {

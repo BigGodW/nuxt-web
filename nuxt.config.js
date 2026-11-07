@@ -25,8 +25,11 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    // 数据库地址：供 Prisma 运行时兜底读取；部署时可用 NUXT_DATABASE_URL 覆盖
-    databaseUrl: process.env.DATABASE_URL || '',
+    // 数据库地址：构建时内联进产物，作为运行时兜底。
+    // 同时读 NUXT_DATABASE_URL，兼容控制台只注入 NUXT_ 前缀变量的部署方式。
+    databaseUrl: process.env.NUXT_DATABASE_URL || process.env.DATABASE_URL || '',
+    // 可选：设置后 /api/health/db 需带 ?token=xxx 才能访问，避免公开暴露诊断信息
+    healthToken: process.env.NUXT_HEALTH_TOKEN || '',
     // 支持 .env 中的 AUTH_SECRET / DEMO_MODE，也可用 NUXT_AUTH_SECRET / NUXT_DEMO_MODE 在运行时覆盖
     authSecret: process.env.NUXT_AUTH_SECRET || process.env.AUTH_SECRET || 'dev-only-secret-please-change',
     demoMode: process.env.DEMO_MODE !== 'false',

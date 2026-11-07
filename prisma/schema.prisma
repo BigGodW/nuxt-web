@@ -5,11 +5,12 @@
 // ============================================================
 generator client {
   provider = "prisma-client-js"
-  // EdgeOne Pages 的 SSR 云函数运行在 Linux（Node 20.x），而本地开发在 Windows。
-  // 只生成 native 引擎会导致线上报 "Query engine library for current platform
-  // could not be found"，因此显式预生成常见 Linux 发行版的引擎。
+  // EdgeOne Pages 的 SSR 云函数实测运行在 RHEL + OpenSSL 1.1.x 镜像，
+  // 而构建机与常见 Linux 发行版多为 OpenSSL 3.0.x。只生成 native / 3.0 引擎时线上报：
+  //   Prisma Client could not locate the Query Engine for runtime "rhel-openssl-1.1.x"
+  // 因此显式预生成以下 Linux 目标；本地 Windows 开发用 native。
   // 注意：每个引擎约 15~20MB，云函数代码包上限 128MB，请勿无节制增加目标。
-  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x"]
+  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x", "rhel-openssl-1.1.x"]
 }
 
 datasource db {
