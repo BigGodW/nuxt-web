@@ -1,0 +1,297 @@
+@import "tailwindcss";
+
+/* ============================================================
+   云涧 · 设计令牌（Tailwind 4 @theme）
+   ------------------------------------------------------------
+   宣纸白 / 墨色 / 朱砂 / 鎏金 / 青瓷
+   修改此处即可全站换肤，业务组件只使用语义化 class
+   ============================================================ */
+@theme {
+  --color-paper: #f7f3ea;
+  --color-paper-deep: #eee6d6;
+  --color-paper-card: #fffdf8;
+  --color-ink: #1f1d1a;
+  --color-ink-soft: #4a453d;
+  --color-ink-muted: #8a8175;
+  --color-line: #ddd3bf;
+  --color-cinnabar: #a8322d;
+  --color-cinnabar-dark: #852520;
+  --color-vermilion: #c1443c;
+  --color-gold: #b99456;
+  --color-gold-light: #d8bd8b;
+  --color-jade: #5c7a6a;
+  --color-jade-light: #e6ede8;
+
+  --font-serif-cn: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --font-sans-cn: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+
+  --shadow-paper: 0 12px 40px -18px rgb(60 45 25 / 0.35);
+  --shadow-lift: 0 18px 50px -20px rgb(60 45 25 / 0.45);
+}
+
+/* Vant 变量对齐中国风主题（移动端组件自动继承） */
+:root {
+  --van-primary-color: #a8322d;
+  --van-danger-color: #a8322d;
+  --van-text-color: #1f1d1a;
+  --van-background: #f7f3ea;
+  --van-background-2: #fffdf8;
+  --van-border-color: #ddd3bf;
+  --van-font-size-md: 14px;
+  --van-base-font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+}
+
+/* ============================================================
+   基础层
+   ============================================================ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-paper text-ink font-sans-cn antialiased;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgb(185 148 86 / 0.09) 0, transparent 32%),
+      radial-gradient(circle at 88% 22%, rgb(92 122 106 / 0.07) 0, transparent 30%);
+    background-attachment: fixed;
+  }
+  /* 窄屏兜底：任何绝对定位/长英文串都不会撑出横向滚动条 */
+  @media (max-width: 767px) {
+    body { overflow-x: hidden; }
+  }
+  ::selection {
+    background: #a8322d;
+    color: #fffdf8;
+  }
+  h1, h2, h3, h4 {
+    @apply font-serif-cn;
+  }
+}
+
+/* ============================================================
+   复用样式
+   ------------------------------------------------------------
+   必须放在 @layer components：Tailwind 的 utilities 层优先级更高，
+   模板中的 text-white / bg-ink / p-4 等才能覆盖这里的默认值。
+   （早期版本放在 layer 外，导致轮播白字、深色卡片配色全部失效）
+   ============================================================ */
+@layer components {
+  /* 移动端统一节奏：手机 16px 边距 / 40px 区块，PC 恢复舒展留白 */
+  .cn-container {
+    @apply mx-auto w-full max-w-[1240px] px-4 sm:px-5 md:px-8;
+  }
+  .cn-section {
+    @apply py-10 sm:py-14 md:py-20;
+  }
+  .cn-page-head {
+    @apply py-8 sm:py-12 md:py-16;
+  }
+
+  .cn-title {
+    @apply font-serif-cn;
+    letter-spacing: 0.12em;
+  }
+
+  .cn-seal {
+    @apply inline-flex items-center justify-center bg-cinnabar text-paper-card font-serif-cn;
+    box-shadow: 0 2px 0 rgb(133 37 32 / 0.25);
+  }
+
+  .cn-hairline {
+    @apply h-px w-full bg-line;
+  }
+
+  .cn-frame,
+  .cn-card {
+    @apply relative border border-line bg-paper-card;
+  }
+  .cn-frame::before,
+  .cn-frame::after,
+  .cn-card::before,
+  .cn-card::after {
+    content: "";
+    @apply pointer-events-none absolute h-3 w-3 border-gold;
+  }
+  .cn-frame::before,
+  .cn-card::before {
+    top: 5px;
+    left: 5px;
+    border-top: 1px solid;
+    border-left: 1px solid;
+  }
+  .cn-frame::after,
+  .cn-card::after {
+    right: 5px;
+    bottom: 5px;
+    border-right: 1px solid;
+    border-bottom: 1px solid;
+  }
+
+  .cn-card {
+    @apply overflow-hidden transition-all duration-300;
+  }
+  /* 触屏设备不触发 hover 位移，避免点按后卡片"粘住" */
+  @media (hover: hover) {
+    .cn-card:hover {
+      @apply -translate-y-1;
+      box-shadow: var(--shadow-lift);
+    }
+  }
+
+  .cn-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-cinnabar px-5 py-2.5 text-[13px] tracking-widest text-paper-card transition-colors sm:px-6 sm:text-sm;
+  }
+  .cn-btn-primary:hover {
+    @apply bg-cinnabar-dark;
+  }
+
+  .cn-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 border border-ink-soft/40 px-5 py-2.5 text-[13px] tracking-widest text-ink transition-colors sm:px-6 sm:text-sm;
+  }
+  .cn-btn-ghost:hover {
+    @apply border-cinnabar text-cinnabar;
+  }
+
+  /* 回纹分隔 */
+  .cn-divider {
+    @apply flex items-center justify-center gap-3 sm:gap-4;
+  }
+  .cn-divider::before,
+  .cn-divider::after {
+    content: "";
+    @apply h-px w-10 bg-line sm:w-16;
+  }
+  .cn-divider span {
+    @apply text-gold;
+    font-size: 12px;
+    letter-spacing: 0.5em;
+  }
+
+  /* 云纹底 */
+  .cn-cloud-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60' viewBox='0 0 120 60'%3E%3Cg fill='none' stroke='%23b99456' stroke-opacity='0.16' stroke-width='1'%3E%3Cpath d='M0 40c10 0 10-12 20-12s10 12 20 12 10-12 20-12 10 12 20 12 10-12 20-12 10 12 20 12'/%3E%3Cpath d='M-10 55c10 0 10-12 20-12s10 12 20 12 10-12 20-12 10 12 20 12 10-12 20-12 10 12 20 12 10-12 20-12'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* 文章 / 商品详情正文排版 */
+  .prose-cn {
+    @apply font-sans-cn text-[15px] leading-[2] text-ink-soft;
+  }
+  .prose-cn h1,
+  .prose-cn h2,
+  .prose-cn h3 {
+    @apply mt-10 mb-4 font-serif-cn font-semibold text-ink;
+  }
+  .prose-cn h1 { @apply text-2xl; }
+  .prose-cn h2 { @apply text-xl; }
+  .prose-cn h3 { @apply text-lg; }
+  .prose-cn p { @apply my-5; }
+  .prose-cn img { @apply my-6 w-full rounded-sm; }
+  .prose-cn blockquote {
+    @apply my-6 border-l-2 border-gold bg-paper-deep/50 px-5 py-3 font-serif-cn text-ink;
+  }
+  .prose-cn ul { @apply my-5 list-disc pl-6; }
+  .prose-cn ol { @apply my-5 list-decimal pl-6; }
+  .prose-cn li { @apply my-1.5; }
+  .prose-cn a { @apply text-cinnabar underline underline-offset-4; }
+  .prose-cn hr { @apply my-8 border-line; }
+  .prose-cn strong { @apply font-semibold text-ink; }
+  .prose-cn code { @apply bg-paper-deep px-1.5 py-0.5 text-sm; }
+
+  /* ==========================================================
+     管理后台复用控件
+     ========================================================== */
+  .admin-card {
+    @apply border border-line bg-paper-card p-4 md:p-6;
+  }
+  .admin-label {
+    @apply mb-1.5 block text-xs font-medium tracking-wide text-ink-soft;
+  }
+  .admin-input {
+    @apply w-full rounded-none border border-line bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink-muted/70 focus:border-cinnabar;
+  }
+  .admin-select {
+    @apply w-full appearance-none border border-line bg-white px-3 py-2.5 pr-8 text-sm text-ink outline-none transition-colors placeholder:text-ink-muted/70 focus:border-cinnabar;
+  }
+  .admin-btn {
+    @apply inline-flex items-center justify-center gap-1.5 border border-line bg-white px-3 py-2 text-[13px] text-ink-soft transition-colors hover:border-cinnabar hover:text-cinnabar sm:px-4 sm:text-sm;
+  }
+  .admin-btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 bg-cinnabar px-3 py-2 text-[13px] text-white transition-colors hover:bg-cinnabar-dark sm:px-4 sm:text-sm;
+  }
+  .admin-btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 border border-cinnabar/30 px-3 py-2 text-[13px] text-cinnabar transition-colors hover:bg-cinnabar/10 sm:px-4 sm:text-sm;
+  }
+  .admin-table {
+    @apply w-full min-w-[640px] border-collapse text-left text-sm;
+  }
+  .admin-table th {
+    @apply border-b border-line bg-paper-deep/40 px-3 py-2 text-xs font-medium tracking-wider text-ink-soft sm:px-4 sm:py-3;
+  }
+  .admin-table td {
+    @apply border-b border-line/70 px-3 py-2 text-ink-soft sm:px-4 sm:py-3;
+  }
+  @media (hover: hover) {
+    .admin-table tr:hover td { @apply bg-paper/60; }
+  }
+  .admin-tag {
+    @apply inline-flex items-center border border-line px-2 py-0.5 text-xs;
+  }
+
+  /* 图片占位（加载失败时降级为中国风渐变底） */
+  .img-placeholder {
+    @apply flex items-center justify-center bg-paper-deep font-serif-cn text-ink-muted;
+    background-image: linear-gradient(135deg, #eee6d6 0%, #e2d6bf 50%, #d8cbb3 100%);
+  }
+}
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d8cdb8; }
+::-webkit-scrollbar-thumb:hover { background: #b99456; }
+
+/* ============================================================
+   Vant 组件中国风适配（移动端交互组件）
+   ============================================================ */
+.van-tabs__nav { background: transparent !important; }
+.van-tabs__content { display: none; }
+.van-tab { font-size: 13px; letter-spacing: 0.12em; }
+.van-search { padding: 0; background: transparent; }
+.van-search__content { background: #fffdf8; border: 1px solid #ddd3bf; border-radius: 0; }
+.van-field { background: transparent; }
+.van-cell { background: #fffdf8; }
+.van-popup { background: #f7f3ea; }
+.van-button { border-radius: 0; }
+.van-dialog { border-radius: 0; }
+.van-dialog__confirm, .van-dialog__cancel { color: #a8322d; }
+.van-radio__label { margin-left: 6px; }
+
+/* ============================================================
+   移动端紧凑排版（<= 767px）
+   ------------------------------------------------------------
+   统一压低正文留白、控件高度与字号，避免长页面松散
+   ============================================================ */
+@media (max-width: 767px) {
+  .prose-cn { font-size: 14px; line-height: 1.9; }
+  .prose-cn h1 { font-size: 21px; }
+  .prose-cn h2 { font-size: 18px; }
+  .prose-cn h3 { font-size: 16px; }
+  .prose-cn h1,
+  .prose-cn h2,
+  .prose-cn h3 { margin-top: 24px; margin-bottom: 10px; }
+  .prose-cn p { margin-top: 12px; margin-bottom: 12px; }
+  .prose-cn img { margin-top: 16px; margin-bottom: 16px; }
+  .prose-cn blockquote { margin: 16px 0; padding: 10px 14px; }
+  .prose-cn ul, .prose-cn ol { margin: 12px 0; padding-left: 20px; }
+  .prose-cn hr { margin: 22px 0; }
+
+  .van-search__content { padding: 0 8px; }
+  .van-field__control { min-height: 34px; }
+  .van-tabs__nav { padding: 0; }
+  .van-tab { padding: 0 8px; font-size: 12px; }
+  /* 卡片标题在双列窄卡里收紧字距，减少过早截断 */
+  .cn-card .cn-title { letter-spacing: 0.04em; }
+  .van-button--small { height: 32px; padding: 0 10px; font-size: 12px; }
+  .van-swipe__indicator { width: 5px; height: 5px; }
+}

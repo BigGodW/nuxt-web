@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1e7d2"/><stop offset="1" stop-color="#cdb68d"/></linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <circle cx="900" cy="210" r="140" fill="#fffaf0" opacity=".45"/>
+  <g fill="#8a7047" opacity=".18">
+    <path d="M0 540 L180 380 L330 500 L500 320 L700 540 L900 400 L1200 600 L1200 800 L0 800 Z"/>
+    <path d="M0 640 L240 500 L420 620 L640 470 L860 640 L1100 520 L1200 600 L1200 800 L0 800 Z"/>
+  </g>
+  <g transform="translate(410 220)" fill="none" stroke="#6b5737" stroke-width="4">
+    <path d="M60 80 C160 140 180 250 150 350" stroke-width="7"/>
+    <path d="M150 350 C120 300 60 270 20 280 C50 330 100 355 150 350 Z" fill="#8b9b6a" opacity=".85"/>
+    <path d="M150 350 C190 300 250 275 290 290 C255 340 205 360 150 350 Z" fill="#7d9160" opacity=".85"/>
+    <path d="M120 250 C70 210 30 215 5 240 C50 265 90 265 120 250 Z" fill="#9aa877" opacity=".8"/>
+    <path d="M175 275 C220 225 265 225 295 245 C255 280 210 290 175 275 Z" fill="#93a573" opacity=".8"/>
+    <path d="M150 350 L150 430"/>
+  </g>
+  <g transform="translate(430 620)">
+    <path d="M0 0 L340 0 L310 110 L30 110 Z" fill="#f7efe0" stroke="#6b5737" stroke-width="3"/>
+    <ellipse cx="170" cy="0" rx="170" ry="30" fill="#e8d9bc" stroke="#6b5737" stroke-width="3"/>
+  </g>
+  <g transform="translate(560 646)">
+    <rect width="64" height="64" fill="#a8322d"/>
+    <text x="32" y="28" font-size="22" fill="#fffdf8" font-family="serif" text-anchor="middle">云</text>
+    <text x="32" y="54" font-size="22" fill="#fffdf8" font-family="serif" text-anchor="middle">涧</text>
+  </g>
+</svg>

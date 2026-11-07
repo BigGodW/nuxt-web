@@ -1,0 +1,212 @@
+// ============================================================
+// 云涧 · 数据模型
+// 分层：内容(Article) / 商品(Product) / 站点(Banner, SiteSetting) / 系统(AdminUser)
+// 约定：所有对外主键使用 cuid，业务唯一键使用 slug，时间字段统一 createdAt/updatedAt
+// ============================================================
+generator client {
+  provider = "prisma-client-js"
+  // EdgeOne Pages 的 SSR 云函数运行在 Linux（Node 20.x），而本地开发在 Windows。
+  // 只生成 native 引擎会导致线上报 "Query engine library for current platform
+  // could not be found"，因此显式预生成常见 Linux 发行版的引擎。
+  // 注意：每个引擎约 15~20MB，云函数代码包上限 128MB，请勿无节制增加目标。
+  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum ProductStatus {
+  ON_SALE
+  OFF_SHELF
+}
+
+enum ImageKind {
+  CAROUSEL // 商品轮播图
+  DETAIL   // 商品详情图
+  COVER    // 备用封面
+}
+
+enum CommonStatus {
+  ENABLED
+  DISABLED
+}
+
+/// 后台管理员
+model AdminUser {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  passwordHash String
+  nickname     String    @default("管理员")
+  role         String    @default("admin")
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("admin_users")
+}
+
+/// 文章分类
+model ArticleCategory {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  sortOrder   Int       @default(0)
+  articles    Article[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("article_categories")
+}
+
+/// 文章
+model Article {
+  id             String           @id @default(cuid())
+  title          String
+  slug           String           @unique
+  summary        String?          @db.Text
+  content        String           @db.Text // Markdown
+  coverImage     String?
+  author         String           @default("云涧编辑部")
+  tags           String[]         @default([])
+  status         ArticleStatus    @default(DRAFT)
+  isTop          Boolean          @default(false)
+  viewCount      Int              @default(0)
+  publishedAt    DateTime?
+  seoTitle       String?
+  seoDescription String?          @db.Text
+  categoryId     String?
+  category       ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([categoryId])
+  @@map("articles")
+}
+
+/// 商品品种（支持二级树，例如 茶 > 乌龙茶）
+model ProductCategory {
+  id          String            @id @default(cuid())
+  name        String
+  slug        String            @unique
+  description String?
+  image       String?
+  sortOrder   Int               @default(0)
+  parentId    String?
+  parent      ProductCategory?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children    ProductCategory[] @relation("CategoryTree")
+  products    Product[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([parentId])
+  @@map("product_categories")
+}
+
+/// 商品类型（工艺 / 系列等独立维度，例如 手作、限量、礼盒）
+model ProductType {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  sortOrder   Int       @default(0)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("product_types")
+}
+
+/// 商品
+model Product {
+  id             String           @id @default(cuid())
+  name           String
+  slug           String           @unique
+  subtitle       String?
+  summary        String?          @db.Text
+  description    String?          @db.Text // 详情 Markdown
+  coverImage     String?
+  price          Decimal          @default(0) @db.Decimal(10, 2)
+  originalPrice  Decimal?         @db.Decimal(10, 2)
+  stock          Int              @default(0)
+  unit           String           @default("件")
+  status         ProductStatus    @default(ON_SALE)
+  isFeatured     Boolean          @default(false)
+  isRecommend    Boolean          @default(false)
+  sortOrder      Int              @default(0)
+  viewCount      Int              @default(0)
+  origin         String?          // 产地
+  material       String?          // 材质
+  craft          String?          // 工艺
+  packageInfo    String?          // 包装
+  specs          Json?            // 规格参数 [{ name, value }]
+  tags           String[]         @default([])
+  seoTitle       String?
+  seoDescription String?          @db.Text
+  categoryId     String?
+  category       ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  typeId         String?
+  type           ProductType?     @relation(fields: [typeId], references: [id], onDelete: SetNull)
+  images         ProductImage[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([status, categoryId])
+  @@index([typeId])
+  @@map("products")
+}
+
+/// 商品图片（轮播图 / 详情图，独立表便于排序与增删）
+model ProductImage {
+  id        String    @id @default(cuid())
+  productId String
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  kind      ImageKind @default(CAROUSEL)
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  @@index([productId, kind])
+  @@map("product_images")
+}
+
+/// 站点轮播图（position 支持首页 / 商品页等多位置扩展）
+model Banner {
+  id        String       @id @default(cuid())
+  title     String
+  subtitle  String?
+  image     String
+  link      String?
+  position  String       @default("HOME")
+  status    CommonStatus @default(ENABLED)
+  sortOrder Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([position, status])
+  @@map("banners")
+}
+
+/// 网站信息（键值对，后台按 group 分组维护）
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  label     String
+  value     String   @db.Text
+  group     String   @default("basic")
+  type      String   @default("text") // text | textarea | image | json | color | boolean
+  sortOrder Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@index([group])
+  @@map("site_settings")
+}

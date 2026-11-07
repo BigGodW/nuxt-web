@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#faf7f0"/><stop offset="1" stop-color="#ded7c8"/></linearGradient>
+    <linearGradient id="bowl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e2ded3"/></linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <circle cx="860" cy="240" r="160" fill="#ffffff" opacity=".45"/>
+  <g stroke="#b9b0a0" stroke-opacity=".4" fill="none" stroke-width="2">
+    <path d="M0 160 H1200 M0 200 H1200"/>
+    <path d="M0 640c100 0 100-40 200-40s100 40 200 40 100-40 200-40 100 40 200 40 100-40 200-40 100 40 200 40"/>
+  </g>
+  <g transform="translate(410 240)">
+    <path d="M30 100 L370 100 L330 320 Q200 370 70 320 Z" fill="url(#bowl)" stroke="#a9a08e" stroke-width="3"/>
+    <ellipse cx="200" cy="100" rx="170" ry="36" fill="#fdfcf8" stroke="#a9a08e" stroke-width="3"/>
+    <ellipse cx="200" cy="100" rx="140" ry="24" fill="#eeeae0"/>
+    <path d="M90 320 L76 352 L324 352 L310 320" fill="#f4f1ea" stroke="#a9a08e" stroke-width="3"/>
+    <ellipse cx="200" cy="352" rx="124" ry="16" fill="#e6e1d5"/>
+    <path d="M200 60 q-20 -60 20 -110" fill="none" stroke="#c9c0ae" stroke-width="2" opacity=".7"/>
+  </g>
+  <g transform="translate(560 646)">
+    <rect width="64" height="64" fill="#a8322d"/>
+    <text x="32" y="28" font-size="22" fill="#fffdf8" font-family="serif" text-anchor="middle">云</text>
+    <text x="32" y="54" font-size="22" fill="#fffdf8" font-family="serif" text-anchor="middle">涧</text>
+  </g>
+</svg>

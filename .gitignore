@@ -1,0 +1,25 @@
+node_modules
+.nuxt
+.output
+.data
+dist
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+.idea
+.vscode
+prisma/*.db
+prisma/migrations/dev*
+coverage
+.shots/
+
+# EdgeOne Pages 部署产物与临时文件（由 edgeone makers deploy 自动生成）
+.edgeone/
+.edgeone-nitro-config.mjs
+edgeone.schema.json
+*.zip
+
+# 工作区内部记录（保留在本地，不进入代码仓库）
+.workbuddy/
