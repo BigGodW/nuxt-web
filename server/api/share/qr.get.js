@@ -3,8 +3,19 @@ import QRCode from 'qrcode'
 
 /**
  * 只允许生成本站链接的二维码，避免接口被滥用成任意网址的二维码服务。
- * 比对当前请求 host 与 runtimeConfig.public.siteUrl 的 host。
+ *
+ * EdgeOne / Serverless 常把云函数内部域名作为 Host（如 pages-scf-*.qcloudteo.com），
+ * 与用户实际访问的对外域名不一致，因此需同时采信代理转发头与请求来源。
  */
+function toHost(value) {
+  if (!value) return ''
+  try {
+    return new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`).host.toLowerCase()
+  } catch {
+    return ''
+  }
+}
+
 function isSameSite(target, event) {
   let url
   try {
@@ -13,20 +24,22 @@ function isSameSite(target, event) {
     return false
   }
   if (!['http:', 'https:'].includes(url.protocol)) return false
+
   const config = useRuntimeConfig()
-  const requestHost = getRequestHost(event)
-  const candidates = [
-    config.public?.siteUrl || '',
-    `https://${requestHost}`,
-    `http://${requestHost}`
-  ]
-  return candidates.some((item) => {
-    try {
-      return new URL(item).host === url.host
-    } catch {
-      return false
-    }
-  })
+  const forwarded = getRequestHeader(event, 'x-forwarded-host') ||
+    getRequestHeader(event, 'x-original-host') || ''
+  const source = getRequestHeader(event, 'referer') || getRequestHeader(event, 'origin') || ''
+  const hosts = new Set([
+    toHost(config.public?.siteUrl),
+    toHost(getRequestHost(event)),
+    toHost(forwarded),
+    toHost(source)
+  ].filter(Boolean))
+
+  if (hosts.has(url.host.toLowerCase())) return true
+  // 未配置正式域名时，接受平台分配的预览域名（平台自有域，不会开放成任意网址二维码）
+  if (!config.public?.siteUrl && /\.edgeone\.cool$/i.test(url.hostname)) return true
+  return false
 }
 
 export default defineEventHandler(async (event) => {
